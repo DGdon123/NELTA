@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
 import 'package:nelta/common/app_const/app_color.dart';
 import 'package:nelta/common/app_const/app_const.dart';
 import 'package:nelta/features/auth/data/repositories/token_repository.dart';
@@ -26,19 +27,19 @@ class SignUpScreen extends ConsumerStatefulWidget {
 }
 
 class _SignUpScreenState extends ConsumerState<SignUpScreen> {
-  late TextEditingController nameController;
-  late TextEditingController addressController;
-  late TextEditingController emailController;
-  late TextEditingController passwordController;
-  late TextEditingController memberIdController;
+  TextEditingController nameController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController memberIdController = TextEditingController();
   late bool isvisible;
   final formKey = GlobalKey<FormState>();
   bool remberPassword = false;
 
-  late String enrollMentGroupValue;
-  late String userTypeGroupValue;
-  late String lifeMemberGroupValue;
-  int? selectedCountryId;
+  String? enrollMentGroupValue;
+  String? userTypeGroupValue;
+  String? lifeMemberGroupValue;
+  String? selectedCountryId;
   @override
   void initState() {
     isvisible = true;
@@ -81,6 +82,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     }
   }
 
+  var logger = Logger(
+    printer: PrettyPrinter(),
+  );
   signUpF() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
 
@@ -117,6 +121,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       TokenRequestModel auhtModel = TokenRequestModel(
           email: ApiConst.getTokenUserEmail,
           password: ApiConst.getTokenUserPassword);
+      logger.d(memberIdController.text);
+      logger.d(selectedCountryId!);
+      logger.d(enrollMentGroupValue);
+      logger.d(userTypeGroupValue);
+      logger.d(lifeMemberGroupValue);
       SignUpRequestModel singUp = SignUpRequestModel(
           member_id: memberIdController.text,
           email: emailController.text,
@@ -125,13 +134,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           fcmToken: "s",
           fullName: nameController.text,
           address: addressController.text,
-          enrollment: enrollMentGroupValue,
-          userType: userTypeGroupValue,
-          lifeMember: lifeMemberGroupValue);
+          enrollment: enrollMentGroupValue.toString(),
+          userType: userTypeGroupValue.toString(),
+          lifeMember: lifeMemberGroupValue.toString());
       ref.read(loginloadingProvider.notifier).update((state) => true);
       if (context.mounted) {
         final token =
             await ref.read(tokenRepositoryProvider).requestTokenRepo(auhtModel);
+
         return token.fold((l) {
           ref.read(loginloadingProvider.notifier).update((state) => false);
           return showCustomSnackBar("Faild ", context, isError: true);
@@ -285,7 +295,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             })
                           ],
                           onChanged: (value) {
-                            selectedCountryId = value!.id;
+                            selectedCountryId = value!.id.toString();
                             // ref
                             //     .read(proviceIdProvider.notifier)
                             //     .state = value!.id;
@@ -314,7 +324,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   enrollMentGroupValue = value.toString();
                                 });
                               },
-                              groupValue: enrollMentGroupValue,
+                              groupValue: enrollMentGroupValue.toString(),
                               label: AppConst.kLabelKindergarten,
                               value: AppConst.kKindergarten,
                               padding: EdgeInsets.zero,
@@ -325,7 +335,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   enrollMentGroupValue = value.toString();
                                 });
                               },
-                              groupValue: enrollMentGroupValue,
+                              groupValue: enrollMentGroupValue.toString(),
                               label: AppConst.kLabelSchool,
                               value: AppConst.kSchool,
                               padding: EdgeInsets.zero,
@@ -336,7 +346,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   enrollMentGroupValue = value.toString();
                                 });
                               },
-                              groupValue: enrollMentGroupValue,
+                              groupValue: enrollMentGroupValue.toString(),
                               label: AppConst.kLabelUniversity,
                               value: AppConst.kUniversity,
                               padding: EdgeInsets.zero,
@@ -367,7 +377,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   userTypeGroupValue = value.toString();
                                 });
                               },
-                              groupValue: userTypeGroupValue,
+                              groupValue: userTypeGroupValue.toString(),
                               label: AppConst.kLabelTeacher,
                               value: AppConst.kTeacher,
                               padding: EdgeInsets.zero,
@@ -378,7 +388,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   userTypeGroupValue = value.toString();
                                 });
                               },
-                              groupValue: userTypeGroupValue,
+                              groupValue: userTypeGroupValue.toString(),
                               label: AppConst.kLabelReacher,
                               value: AppConst.kReacher,
                               padding: EdgeInsets.zero,
@@ -389,7 +399,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                                   userTypeGroupValue = value.toString();
                                 });
                               },
-                              groupValue: userTypeGroupValue,
+                              groupValue: userTypeGroupValue.toString(),
                               label: AppConst.kLabelTrainer,
                               value: AppConst.kTrainer,
                               padding: EdgeInsets.zero,

@@ -9,7 +9,7 @@ class SignUpRequestModel {
   final String enrollment;
   final String userType;
   final String lifeMember;
-  final int countryId;
+  final String countryId;
   final String? member_id;
   final String fcmToken;
   SignUpRequestModel(
@@ -48,7 +48,7 @@ class SignUpRequestModel {
       enrollment: map['enrollment'] as String,
       userType: map['userType'] as String,
       lifeMember: map['lifeMember'] as String,
-      countryId: map['countryId'] as int,
+      countryId: map['countryId'] as String,
       member_id: map['member_id'] as String,
       fcmToken: map['fcmToken'] as String,
     );

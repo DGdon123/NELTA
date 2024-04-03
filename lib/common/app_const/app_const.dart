@@ -20,7 +20,7 @@ class AppConst {
   static const String kForgotPasswordAppbar = "Forgot Password";
   static const String kFullName = "Full Name";
   static const String kAddress = "Address";
-  static const String kWord = "Word";
+  static const String kWord = "Ward";
   static const String kProvince = "Province";
   static const String kDistrict = "District";
   static const String kMunicipality = "Municipality";

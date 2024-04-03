@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -114,30 +116,34 @@ class NoticeDetailScreen extends StatelessWidget {
       BuildContext context, String url, String name) async {
     final appStorage = await getApplicationDocumentsDirectory();
     final file = File("${appStorage.path}/$name");
+
     try {
-      final response = await Dio().get(url,
-          //     onReceiveProgress: (received, total) {
-          //   if (total != -1) {
-          //     final progress = (received / total * 100).toStringAsFixed(0);
-          //     ScaffoldMessenger.of(context).showSnackBar(
-          //       SnackBar(
-          //         content: Text('$progress% downloaded'),
-          //       ),
-          //     );
-          //   }
-          // },
-          options: Options(
-              responseType: ResponseType.bytes,
-              followRedirects: false,
-              receiveTimeout: Duration(seconds: 10)));
-      final raf = file.openSync(mode: FileMode.write);
-      raf.writeFromSync(response.data);
+      final completer = Completer<void>();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('File downloaded successfully'),
+          content: Text('Please wait, the file is opening...'),
+          duration: Duration(minutes: 2),
         ),
       );
+
+      final response = await Dio().get(
+        url,
+        options: Options(
+          responseType: ResponseType.bytes,
+          followRedirects: false,
+          receiveTimeout: Duration(seconds: 10),
+        ),
+      );
+
+      final raf = file.openSync(mode: FileMode.write);
+      raf.writeFromSync(response.data);
       await raf.close();
+
+      completer.complete(); // Signal that the file is downloaded
+
+      // Hide the SnackBar
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
       return file;
     } catch (e) {

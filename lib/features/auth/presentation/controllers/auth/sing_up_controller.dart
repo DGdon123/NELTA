@@ -27,7 +27,7 @@ class SingupController extends StateNotifier<AsyncValue<LoginResponseModel>> {
       state = AsyncValue.data(r);
       await DbClient().setData(dbKey: "userData", value: r.toJson());
       if (context.mounted) {
-        showCustomSnackBar("Welcome to NELTA", context, isError: false);
+        // showCustomSnackBar("Welcome to NELTA", context, isError: false);
         pushAndRemoveUntil(context, const Dashboard());
       }
     });

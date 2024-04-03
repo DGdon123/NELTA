@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:developer';
 import 'dart:io';
-
+import 'package:image_cropper/image_cropper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
@@ -14,7 +14,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nelta/common/app_const/app_color.dart';
-
+import 'package:logger/logger.dart';
 import 'package:nelta/common/app_const/app_const.dart';
 import 'package:nelta/common/app_const/app_images.dart';
 import 'package:nelta/common/asyn_widget/asyncvalue_widget.dart';
@@ -81,27 +81,58 @@ class _MemberProfileUpdateScreenState
   File? image;
   String imgPath = "";
   String imgString = "";
-
-  Future pickImage(ImageSource source) async {
+  CroppedFile? image2;
+  var logger = Logger(
+    printer: PrettyPrinter(),
+  );
+  Future<void> pickAndCropImage(ImageSource source) async {
     try {
-      final image = await ImagePicker().pickImage(
+      final pickedImage = await ImagePicker().pickImage(
         source: source,
         imageQuality: 50,
       );
-      if (image == null) {
+
+      if (pickedImage == null) {
         return;
       } else {
-        final imageTempo = File(image.path);
-        print(imageTempo);
-
-        if (mounted)
+        CroppedFile? croppedFile = await cropImage(File(pickedImage.path));
+        logger.d(croppedFile);
+        if (mounted) {
           setState(() {
-            this.image = imageTempo;
+            this.image2 = croppedFile;
           });
+        }
       }
     } on PlatformException {
       if (kDebugMode) print("Failed to pick image");
     }
+  }
+
+  Future<CroppedFile?> cropImage(File imageFile) async {
+    CroppedFile? croppedFile = await ImageCropper().cropImage(
+        sourcePath: imageFile.path,
+        cropStyle: CropStyle.circle, // You can choose another crop style
+        aspectRatioPresets: [
+          CropAspectRatioPreset.square,
+          CropAspectRatioPreset.ratio3x2,
+          CropAspectRatioPreset.original,
+          CropAspectRatioPreset.ratio4x3,
+          CropAspectRatioPreset.ratio16x9,
+        ],
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Image',
+            toolbarColor: AppColorResources.appPrimaryColor,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false,
+          ),
+          IOSUiSettings(
+            title: 'Cropper',
+          ),
+        ]);
+
+    return croppedFile;
   }
 
   @override
@@ -175,11 +206,11 @@ class _MemberProfileUpdateScreenState
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        image != null
+                        image2 != null
                             ? CircleAvatar(
                                 maxRadius: 40,
                                 backgroundColor: Colors.white,
-                                backgroundImage: FileImage(File(image!.path)),
+                                backgroundImage: FileImage(File(image2!.path)),
                               )
                             // Image.file(
                             //     image!,
@@ -256,7 +287,7 @@ class _MemberProfileUpdateScreenState
                                                 color: CupertinoColors.black),
                                           ),
                                           onPressed: () async {
-                                            await pickImage(
+                                            await pickAndCropImage(
                                                 ImageSource.gallery);
                                             Navigator.pop(context);
                                           },
@@ -271,7 +302,8 @@ class _MemberProfileUpdateScreenState
                                                 color: CupertinoColors.black),
                                           ),
                                           onPressed: () async {
-                                            await pickImage(ImageSource.camera);
+                                            await pickAndCropImage(
+                                                ImageSource.camera);
                                             Navigator.pop(context);
                                           },
                                         ),
@@ -687,14 +719,14 @@ class _MemberProfileUpdateScreenState
                                 }
                                 return;
                               }
-                              String? fileName = image == null
+                              String? fileName = image2 == null
                                   ? null
-                                  : image!.path.split('/').last;
+                                  : image2!.path.split('/').last;
 
                               // log(fileName + "image");
-                              final fileData = image == null
+                              final fileData = image2 == null
                                   ? null
-                                  : await MultipartFile.fromFile(image!.path,
+                                  : await MultipartFile.fromFile(image2!.path,
                                       filename: fileName);
                               FormData formData = FormData.fromMap({
                                 "province_id": selectedPradeshId,

@@ -101,9 +101,20 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
           const SizedBox(
             height: 10,
           ),
-          DrawerProfileCard(
-            isLifeMember: isLifeMember,
-          ),
+          isLifeMember == "true"
+              ? DrawerProfileCard(
+                  onTap: () async {
+                    await ref.refresh(pradeshController);
+                    await ref.refresh(districtController);
+                    await ref.refresh(municipalityControllerProvider);
+                    normalNav(context, const MemberProfilScreen());
+                  },
+                  isLifeMember: isLifeMember,
+                )
+              : DrawerProfileCard(
+                  isLifeMember: isLifeMember,
+                  onTap: () => normalNav(context, const ProfilScreen())),
+
           // isLifeMember == true ? DrawerProfileCard() : Text("data"),
           // Container(
           //   height: screenW * 0.3,
@@ -300,8 +311,10 @@ class _AppDrawerState extends ConsumerState<AppDrawer> {
 //   }
 // }
 class DrawerProfileCard extends ConsumerStatefulWidget {
-  const DrawerProfileCard({super.key, required this.isLifeMember});
+  const DrawerProfileCard(
+      {super.key, required this.isLifeMember, required this.onTap});
   final String isLifeMember;
+  final void Function()? onTap;
   @override
   ConsumerState<DrawerProfileCard> createState() => _DrawerProfileCardState();
 }
@@ -352,99 +365,107 @@ class _DrawerProfileCardState extends ConsumerState<DrawerProfileCard> {
         AsyncValueWidget(
             height: 60,
             value: memberProfile,
-            data: (data) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColorResources.appSecondaryColor,
-                  ),
-                  // height: screenH * 0.19,
-                  child: Column(children: [
-                    ListTile(
-                      // isThreeLine: true,
-                      trailing: CachedNetworkImage(
-                        // width: 50,
-                        // height: 50,
-                        imageUrl: AppImages.imageNetworkPath + data.photo,
-                        imageBuilder: (context, imageProvider) => CircleAvatar(
-                          backgroundColor: Colors.white,
-                          backgroundImage: NetworkImage(
-                              AppImages.imageNetworkPath + data.photo),
-                          maxRadius: 25,
-                        ),
-                        placeholder: (context, url) => CircleAvatar(
-                          backgroundColor: Colors.white,
-                          backgroundImage:
-                              AssetImage(AppImages.userPlaceHolderNoInternet),
-                          maxRadius: 25,
-                        ),
-                        errorWidget: (context, url, error) => CircleAvatar(
-                          backgroundColor: Colors.white,
-                          backgroundImage:
-                              AssetImage(AppImages.userPlaceHolderNoInternet),
-                          maxRadius: 25,
-                        ),
-                      ),
-                      // CircleAvatar(
-                      //     maxRadius: 25,
-                      //     backgroundColor: AppColorResources.white,
-                      //     backgroundImage: NetworkImage(
-                      //         AppImages.imageNetworkPath + data.photo)),
-                      title: Text(
-                        data.fname + " " + data.lname,
-                        style: const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        data.email.toString(),
-                        style: TextStyle(
-                          fontFamily: "PS",
-                          fontSize: 12,
-                          color: CupertinoColors.white,
-                        ),
-                      ),
+            data: (data) => InkWell(
+                  onTap: widget.onTap,
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: AppColorResources.appSecondaryColor,
                     ),
-                  ]),
+                    // height: screenH * 0.19,
+                    child: Column(children: [
+                      ListTile(
+                        // isThreeLine: true,
+                        trailing: CachedNetworkImage(
+                          // width: 50,
+                          // height: 50,
+                          imageUrl: AppImages.imageNetworkPath + data.photo,
+                          imageBuilder: (context, imageProvider) =>
+                              CircleAvatar(
+                            backgroundColor: Colors.white,
+                            backgroundImage: NetworkImage(
+                                AppImages.imageNetworkPath + data.photo),
+                            maxRadius: 25,
+                          ),
+                          placeholder: (context, url) => CircleAvatar(
+                            backgroundColor: Colors.white,
+                            backgroundImage:
+                                AssetImage(AppImages.userPlaceHolderNoInternet),
+                            maxRadius: 25,
+                          ),
+                          errorWidget: (context, url, error) => CircleAvatar(
+                            backgroundColor: Colors.white,
+                            backgroundImage:
+                                AssetImage(AppImages.userPlaceHolderNoInternet),
+                            maxRadius: 25,
+                          ),
+                        ),
+                        // CircleAvatar(
+                        //     maxRadius: 25,
+                        //     backgroundColor: AppColorResources.white,
+                        //     backgroundImage: NetworkImage(
+                        //         AppImages.imageNetworkPath + data.photo)),
+                        title: Text(
+                          data.fname + " " + data.lname,
+                          style: const TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          data.email.toString(),
+                          style: TextStyle(
+                            fontFamily: "PS",
+                            fontSize: 12,
+                            color: CupertinoColors.white,
+                          ),
+                        ),
+                      ),
+                    ]),
+                  ),
                 ),
             providerBase: getmemberProfileControllerProvider)
         : AsyncValueWidget(
             height: 60,
             providerBase: userProfileControllerProvider,
             value: userProfile,
-            data: (data) => Container(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: AppColorResources.appSecondaryColor),
-              // height: screenH * 0.19,
-              child: Column(children: [
-                ListTile(
-                  // isThreeLine: true,
-                  trailing: CircleAvatar(
-                      maxRadius: 25,
-                      backgroundColor: AppColorResources.white,
-                      onBackgroundImageError: (exception, stackTrace) {},
-                      // child: Image.asset(AppImages.userPlaceHolderNoInternet),
-                      backgroundImage:
-                          // NetworkImage(AppImages.userPlaceHolderInternet),
-                          data.photo == AppImages.userPlaceHolderInternet
-                              ? NetworkImage(AppImages.userPlaceHolderInternet)
-                              : NetworkImage(
-                                  AppImages.imageNetworkPath + data.photo)),
-                  title: Text(
-                    data.fullName,
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    data.email.toString(),
-                    style: TextStyle(
-                      fontFamily: "PS",
-                      color: CupertinoColors.white,
+            data: (data) => InkWell(
+              onTap: widget.onTap,
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: AppColorResources.appSecondaryColor),
+                // height: screenH * 0.19,
+                child: Column(children: [
+                  ListTile(
+                    // isThreeLine: true,
+                    trailing: CircleAvatar(
+                        maxRadius: 25,
+                        backgroundColor: AppColorResources.white,
+                        onBackgroundImageError: (exception, stackTrace) {},
+                        // child: Image.asset(AppImages.userPlaceHolderNoInternet),
+                        backgroundImage:
+                            // NetworkImage(AppImages.userPlaceHolderInternet),
+                            data.photo == AppImages.userPlaceHolderInternet
+                                ? NetworkImage(
+                                    AppImages.userPlaceHolderInternet)
+                                : NetworkImage(
+                                    AppImages.imageNetworkPath + data.photo)),
+                    title: Text(
+                      data.fullName,
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      data.email.toString(),
+                      style: TextStyle(
+                        fontFamily: "PS",
+                        color: CupertinoColors.white,
+                      ),
                     ),
                   ),
-                ),
-              ]),
+                ]),
+              ),
             ),
           );
   }

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nelta/common/app_const/app_color.dart';
 import 'package:nelta/common/app_const/app_const.dart';
@@ -41,27 +42,55 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
   File? image;
   String imgPath = "";
   String imgString = "";
-
-  Future pickImage(ImageSource source) async {
+  CroppedFile? image2;
+  Future<void> pickAndCropImage(ImageSource source) async {
     try {
-      final image = await ImagePicker().pickImage(
+      final pickedImage = await ImagePicker().pickImage(
         source: source,
         imageQuality: 50,
       );
-      if (image == null) {
+
+      if (pickedImage == null) {
         return;
       } else {
-        final imageTempo = File(image.path);
-        print(this.image);
+        CroppedFile? croppedFile = await cropImage(File(pickedImage.path));
 
-        if (mounted)
+        if (mounted) {
           setState(() {
-            this.image = imageTempo;
+            this.image2 = croppedFile;
           });
+        }
       }
     } on PlatformException {
       if (kDebugMode) print("Failed to pick image");
     }
+  }
+
+  Future<CroppedFile?> cropImage(File imageFile) async {
+    CroppedFile? croppedFile = await ImageCropper().cropImage(
+        sourcePath: imageFile.path,
+        cropStyle: CropStyle.circle, // You can choose another crop style
+        aspectRatioPresets: [
+          CropAspectRatioPreset.square,
+          CropAspectRatioPreset.ratio3x2,
+          CropAspectRatioPreset.original,
+          CropAspectRatioPreset.ratio4x3,
+          CropAspectRatioPreset.ratio16x9,
+        ],
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Image',
+            toolbarColor: AppColorResources.appPrimaryColor,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false,
+          ),
+          IOSUiSettings(
+            title: 'Cropper',
+          ),
+        ]);
+
+    return croppedFile;
   }
 
   @override
@@ -107,11 +136,11 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                     borderRadius: BorderRadius.circular(10)),
                 child: Row(
                   children: [
-                    image != null
+                    image2 != null
                         ? CircleAvatar(
                             maxRadius: 40,
                             backgroundColor: Colors.white,
-                            backgroundImage: FileImage(File(image!.path)),
+                            backgroundImage: FileImage(File(image2!.path)),
                           )
                         : widget.data.photo.isNotEmpty
                             ? CircleAvatar(
@@ -153,7 +182,8 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                                               color: CupertinoColors.black),
                                         ),
                                         onPressed: () async {
-                                          await pickImage(ImageSource.gallery);
+                                          await pickAndCropImage(
+                                              ImageSource.gallery);
                                           Navigator.pop(context);
                                         },
                                       ),
@@ -167,7 +197,8 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                                               color: CupertinoColors.black),
                                         ),
                                         onPressed: () async {
-                                          await pickImage(ImageSource.camera);
+                                          await pickAndCropImage(
+                                              ImageSource.camera);
                                           Navigator.pop(context);
                                         },
                                       ),
@@ -353,12 +384,13 @@ class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
                           fixedSize:
                               Size(MediaQuery.of(context).size.width, 35)),
                       onPressed: () async {
-                        String? fileName =
-                            image == null ? null : image!.path.split('/').last;
-                        print(image!.path.split('/').last);
-                        final fileData = image == null
+                        String? fileName = image2 == null
                             ? null
-                            : await MultipartFile.fromFile(image!.path,
+                            : image2!.path.split('/').last;
+                        print(image2!.path.split('/').last);
+                        final fileData = image2 == null
+                            ? null
+                            : await MultipartFile.fromFile(image2!.path,
                                 filename: fileName);
                         UpdateProfileRestModel update = UpdateProfileRestModel(
                             photo: fileData,

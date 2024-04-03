@@ -315,6 +315,9 @@ class _MemberProfilScreenState extends ConsumerState<MemberProfilScreen> {
                       subtitle: Text(data.Gender.isEmpty ? "-" : data.Gender,
                           style: GoogleFonts.poppins()),
                     ),
+                    SizedBox(
+                      height: 10,
+                    ),
                   ],
                 ),
               ),

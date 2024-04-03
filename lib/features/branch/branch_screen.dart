@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
 import 'package:nelta/common/app_const/app_color.dart';
 import 'package:nelta/common/app_const/app_const.dart';
 import 'package:nelta/common/asyn_widget/asyncvalue_widget.dart';
@@ -14,6 +15,9 @@ class BranchListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final conferenceList = ref.watch(branchListControllerProvider);
     double screenW = MediaQuery.of(context).size.width;
+    var logger = Logger(
+      printer: PrettyPrinter(),
+    );
     return Scaffold(
         appBar: AppBar(
           title: const Text(AppConst.kappBarbranches),
@@ -27,8 +31,9 @@ class BranchListScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     child: Column(
                       children: [
-                        ...data.map(
-                          (e) => InkWell(
+                        ...data.map((e) {
+                          logger.d(e.aboutOffice);
+                          return InkWell(
                             onTap: () => normalNav(
                                 context,
                                 BranchDetailScreen(
@@ -97,8 +102,8 @@ class BranchListScreen extends ConsumerWidget {
                                     // ),
                                   ]),
                             ),
-                          ),
-                        )
+                          );
+                        })
                       ],
                     ),
                   ),

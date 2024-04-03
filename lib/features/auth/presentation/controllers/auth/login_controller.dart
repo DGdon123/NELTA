@@ -23,7 +23,7 @@ class LoginController extends StateNotifier<AsyncValue<LoginResponseModel>> {
     final result = await authRepositories.loginRepo(loginRequestModel, token);
     result.fold((l) {
       log(l.message.toString());
-      showCustomSnackBar(l.message, context);
+      showCustomSnackBar("Your email or password do not match", context);
       return state = AsyncValue.error(
         l,
         StackTrace.fromString(l.message),

@@ -27,7 +27,7 @@ class ChangePasswordControllerNotifier
     }, (r) async {
       state = AsyncValue.data(r);
       if (context.mounted) {
-        showCustomSnackBar("Password Change Successfully ", context,
+        showCustomSnackBar("Password Changed Successfully", context,
             isError: false);
         pushAndRemoveUntil(context, const Dashboard());
       }

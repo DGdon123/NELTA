@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:developer';
 
@@ -322,6 +323,14 @@ class ConferenceDetailScreen extends ConsumerWidget {
     final appStorage = await getApplicationDocumentsDirectory();
     final file = File("${appStorage.path}/$name");
     try {
+      final completer = Completer<void>();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please wait, the file is opening...'),
+          duration: Duration(minutes: 2),
+        ),
+      );
       final response = await Dio().get(url,
           //     onReceiveProgress: (received, total) {
           //   if (total != -1) {
@@ -339,13 +348,12 @@ class ConferenceDetailScreen extends ConsumerWidget {
               receiveTimeout: Duration(seconds: 10)));
       final raf = file.openSync(mode: FileMode.write);
       raf.writeFromSync(response.data);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('File downloaded successfully'),
-        ),
-      );
-      await raf.close();
 
+      await raf.close();
+      completer.complete(); // Signal that the file is downloaded
+
+      // Hide the SnackBar
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       return file;
     } catch (e) {
       log(e.toString());

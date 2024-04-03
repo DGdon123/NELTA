@@ -9,7 +9,7 @@ import 'package:nelta/common/asyn_widget/asyncvalue_widget.dart';
 import 'package:nelta/features/events/data/models/eventlist_model.dart';
 import 'package:nelta/features/events/presentation/controller/eventdetail_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'package:photo_view/photo_view.dart';
 import '../../../common/app_const/app_color.dart';
 import '../../../common/shimmer widget/shimmer_widget.dart';
 import '../../../core/api_const/api_const.dart';
@@ -166,21 +166,33 @@ class EventDetailScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        CachedNetworkImage(
-                          // width: screenW,
-                          // height: screenW,
-                          imageUrl: ApiConst.openResource + data.eventImage,
-                          placeholder: (context, url) => ShimmerWidget(
-                            listCount: 1,
-                            listHeight: 100,
-                            height: 100,
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            // width: screenW * 0.26,
-                            // height: screenH * 0.14,
-                            decoration: BoxDecoration(
-                                color: Colors.red.withOpacity(0.4),
-                                borderRadius: BorderRadius.circular(20)),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ImageScreen(
+                                    imageURL: ApiConst.openResource +
+                                        data.eventImage),
+                              ),
+                            );
+                          },
+                          child: CachedNetworkImage(
+                            // width: screenW,
+                            // height: screenW,
+                            imageUrl: ApiConst.openResource + data.eventImage,
+                            placeholder: (context, url) => ShimmerWidget(
+                              listCount: 1,
+                              listHeight: 100,
+                              height: 100,
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              // width: screenW * 0.26,
+                              // height: screenH * 0.14,
+                              decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.4),
+                                  borderRadius: BorderRadius.circular(20)),
+                            ),
                           ),
                         ),
                         Padding(
@@ -199,6 +211,42 @@ class EventDetailScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class ImageScreen extends StatelessWidget {
+  final String imageURL;
+
+  const ImageScreen({
+    Key? key,
+    required this.imageURL,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: PhotoView(
+          imageProvider: NetworkImage(imageURL),
+          minScale: PhotoViewComputedScale.contained,
+          maxScale: PhotoViewComputedScale.covered * 2,
+          backgroundDecoration: BoxDecoration(
+            color: Colors.black,
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+          backgroundColor: AppColorResources.white,
+          child: Icon(
+            Icons.arrow_back_rounded,
+            size: 30,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          }),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
     );
   }
 }
